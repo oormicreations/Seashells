@@ -24,7 +24,7 @@ This very simple add-on generates seashell models with a procedural material. It
 
 **Intro Video**
 
-Coming soon.
+https://youtu.be/_a-2RbPvQe0
 
 
 **Download and Installtion**
