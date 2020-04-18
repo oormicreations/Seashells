@@ -4,6 +4,10 @@ A Blender add-on for creating seashells
 
 ---
 
+![logo](https://oormi.in/software/software_images/seashellsthumb.jpg)
+
+---
+
 **Requirements**
 
 * Blender 2.80 or above (_This addon was tested in Blender 2.82_)
