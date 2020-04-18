@@ -8,12 +8,12 @@ bl_info = {
     "name": "Seashells",
     "description": "Creates Seashells",
     "author": "Oormi Creations",
-    "version": (0, 1, 0),
+    "version": (0, 1, 1),
     "blender": (2, 80, 0),
     "location": "3D View > Seashells",
     "warning": "", # used for warning icon and text in addons panel
-    "wiki_url": "",
-    "tracker_url": "",
+    "wiki_url": "https://github.com/oormicreations/Seashells",
+    "tracker_url": "https://github.com/oormicreations/Seashells/issues",
     "category": "Development"
 }
 
@@ -304,7 +304,7 @@ class CCS_OT_CCreateSeaShell(bpy.types.Operator):
 
 class OBJECT_PT_SSPanel(bpy.types.Panel):
 
-    bl_label = "Seashells 0.1.0"
+    bl_label = "Seashells 0.1.1"
     bl_idname = "OBJECT_PT_SS_Panel"
     bl_category = "Seashells"
     bl_space_type = 'VIEW_3D'
