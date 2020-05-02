@@ -1,5 +1,5 @@
-# Seashells
-A Blender add-on for creating seashells
+# Seashells & Paper Fans
+A Blender add-on for creating seashells and paper fan models procedurely.
 
 
 ---
