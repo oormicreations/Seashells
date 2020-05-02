@@ -37,6 +37,8 @@ https://github.com/oormicreations/Seashells/releases
 Install from the Blender Menu > Edit > Preferences > Add-ons > Install. Pick this file. Enable this addon.
 You will find the UI in the 3D View window when you press N.
 
+Do not install the zip file. Unzip the downloaded file and pick the Seashells.py file while installing.
+
 **Usage**
 
 Just click the **Create Seashell** button!
