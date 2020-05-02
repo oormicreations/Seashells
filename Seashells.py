@@ -8,13 +8,13 @@ bl_info = {
     "name": "Seashells",
     "description": "Creates Seashells",
     "author": "Oormi Creations",
-    "version": (0, 1, 1),
+    "version": (0, 2, 0),
     "blender": (2, 80, 0),
     "location": "3D View > Seashells",
     "warning": "", # used for warning icon and text in addons panel
     "wiki_url": "https://github.com/oormicreations/Seashells",
     "tracker_url": "https://github.com/oormicreations/Seashells/issues",
-    "category": "Development"
+    "category": "Object"
 }
 
 import bpy
@@ -159,9 +159,34 @@ def view3d_find( return_area = False ):
     return None, None
 
 
+#----------------------------------------------------------------------------------------
+# Operators
+#----------------------------------------------------------------------------------------
 
+class CRD_OT_CResetDefaults(bpy.types.Operator):
+    bl_idname = "reset.defaults"
+    bl_label = "Reset Defaults"
+    bl_description = "Reset Defaults."
 
-
+    def execute(self, context):
+        scene = context.scene
+        sstool = scene.ss_tool
+        
+        sstool.ss_clean = True
+        sstool.ss_mat = "M1"
+        sstool.ss_res = "Ready..."
+        sstool.ss_segx = 64
+        sstool.ss_segy = 240
+        sstool.fan_anim = True
+        sstool.fan_fend = 100
+        sstool.fan_fstart = 1
+        sstool.fan_nblades = 5
+        sstool.fan_speed = 2
+        sstool.fan_subdiv = 20
+        
+        sstool.ss_res = "Reset to defaults !"
+        return{'FINISHED'}  
+        
 
 
 class CCS_OT_CCreateSeaShell(bpy.types.Operator):
@@ -297,14 +322,121 @@ class CCS_OT_CCreateSeaShell(bpy.types.Operator):
 
         
         sstool.ss_res = "Seashell created !"
-        
         return{'FINISHED'}  
-    
 
+
+class CCF_OT_CCreateFan(bpy.types.Operator):
+    bl_idname = "create.fan"
+    bl_label = "Create Fan"
+    bl_description = "Create a paper fan."
+
+    def execute(self, context):
+        scene = context.scene
+        sstool = scene.ss_tool
+
+        #create triangle and lattice
+
+        #subdiv = 20
+        loc = Vector((-1,1,0))
+        bpy.ops.object.add(radius=2, type='LATTICE')
+        bpy.context.object.data.points_u = 4
+        lat = bpy.context.active_object
+        lat.scale[2] = 0.1
+        lat.location = loc
+
+        bpy.ops.mesh.primitive_plane_add()
+        bpy.ops.object.mode_set(mode = 'OBJECT')
+        obj = bpy.context.active_object
+        bpy.ops.object.mode_set(mode = 'EDIT') 
+        bpy.ops.mesh.select_mode(type="VERT")
+        bpy.ops.mesh.select_all(action = 'DESELECT')
+        bpy.ops.object.mode_set(mode = 'OBJECT')
+        obj.data.vertices[2].select = True
+        bpy.ops.object.mode_set(mode = 'EDIT') 
+        bpy.ops.mesh.dissolve_verts()
+        bpy.ops.mesh.select_all(action = 'SELECT')
+        bpy.ops.mesh.subdivide(number_cuts=sstool.fan_subdiv)
+        bpy.ops.object.mode_set(mode = 'OBJECT')
+        bpy.ops.object.modifier_add(type='LATTICE')
+        bpy.context.object.modifiers["Lattice"].object = lat
+
+        obj.location = loc
+        bpy.ops.object.shade_smooth()
+
+
+        #set lattice points
+
+        bpy.ops.object.select_all(action='DESELECT')
+        bpy.context.view_layer.objects.active = lat
+        lat.select_set(True)
+        bpy.ops.object.editmode_toggle()
+
+        pts = [3,11,7,15]
+        d1 = Vector((0.1,0,-1.5))
+        d2 = Vector((0.15,0,7))
+
+        for p in pts:
+            ppos = lat.data.points[p].co_deform
+            lat.data.points[p-3].co_deform = ppos + d1
+            ppos = lat.data.points[p-1].co_deform
+            lat.data.points[p-2].co_deform = ppos + d2
+         
+        bpy.ops.object.editmode_toggle()
+
+        #apply lattice and make array
+
+        bpy.ops.object.select_all(action='DESELECT')
+        bpy.context.view_layer.objects.active = obj
+        obj.select_set(True)
+        bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Lattice")
+        bpy.ops.object.origin_set(type='ORIGIN_CURSOR', center='BOUNDS')
+
+        bpy.ops.object.select_all(action='DESELECT')
+        lat.select_set(True)
+        bpy.ops.object.delete()
+
+        bpy.ops.object.select_all(action='DESELECT')
+        bpy.context.view_layer.objects.active = obj
+        obj.select_set(True)
+
+        nblades = sstool.fan_nblades
+        blades = [bpy.context.object]
+        for n in range(1,nblades):
+            bpy.ops.object.duplicate_move()
+            bpy.context.object.rotation_euler[2] = (-2 * 3.141592653589793 * n)/nblades
+            blades.append(bpy.context.object)
+
+        for b in blades:
+            b.select_set(True)
+            
+        bpy.ops.object.join()
+        bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
+        bpy.context.object.name = "Fan.001"
+
+        #animate
+        #anim = True
+        #speed  = 1
+        #fstart = 1
+        #fend = 100
+
+        if sstool.fan_anim:
+            #keyInterp = bpy.context.preferences.edit.keyframe_new_interpolation_type
+            #bpy.context.preferences.edit.keyframe_new_interpolation_type ='LINEAR'     #Not working!
+            bpy.context.object.keyframe_insert(data_path='rotation_euler', frame=sstool.fan_fstart)
+            bpy.context.object.rotation_euler[2] = sstool.fan_speed * 3.141592653589793 * 2
+            bpy.context.object.keyframe_insert(data_path='rotation_euler', frame=sstool.fan_fend)
+            #bpy.context.preferences.edit.keyframe_new_interpolation_type = keyInterp
+
+        sstool.ss_res = "Fan created !"
+        return{'FINISHED'}  
+
+#---------------------------------------------------------------------------------------------------------------------------
+# Panels
+#---------------------------------------------------------------------------------------------------------------------------
 
 class OBJECT_PT_SSPanel(bpy.types.Panel):
 
-    bl_label = "Seashells 0.1.1"
+    bl_label = "Seashells 0.2.0"
     bl_idname = "OBJECT_PT_SS_Panel"
     bl_category = "Seashells"
     bl_space_type = 'VIEW_3D'
@@ -322,12 +454,60 @@ class OBJECT_PT_SSPanel(bpy.types.Panel):
         layout.prop(sstool, "ss_segy")
         layout.prop(sstool, "ss_mat")
         layout.prop(sstool, "ss_clean")
-        layout.operator("create.seashell", text = "Create Seashell", icon='TRIA_RIGHT')
-        layout.label(text = sstool.ss_res)        
+        layout.operator("create.seashell", text = "Create Seashell", icon='HEART')
+
+
+class OBJECT_PT_FanPanel(bpy.types.Panel):
+
+    bl_label = "Paper Fans"
+    bl_idname = "OBJECT_PT_FAN_Panel"
+    bl_category = "Seashells"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_context = "objectmode"
+
+    
+    def draw(self, context):
+        layout = self.layout
+        scene = context.scene
+        sstool = scene.ss_tool
+        
+        layout.prop(sstool, "fan_subdiv")
+        layout.prop(sstool, "fan_nblades")
+        layout.prop(sstool, "fan_anim")
+        layout.prop(sstool, "fan_speed")
+        
         row = layout.row(align=True)
-        row.operator("wm.url_open", text="Help | Source | Updates", icon='QUESTION').url = "https://github.com/oormicreations/Seashells"
+        row.prop(sstool, "fan_fstart")
+        row.prop(sstool, "fan_fend")
+        
+        layout.operator("create.fan", text = "Create Fan", icon='HEART')
 
 
+class OBJECT_PT_MiscPanel(bpy.types.Panel):
+
+    bl_label = "Misc"
+    bl_idname = "OBJECT_PT_MISC_Panel"
+    bl_category = "Seashells"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_context = "objectmode"
+
+    
+    def draw(self, context):
+        layout = self.layout
+        scene = context.scene
+        sstool = scene.ss_tool
+        
+        layout.label(text = sstool.ss_res)
+        layout.operator("reset.defaults", text = "Reset Defaults", icon='X')
+        layout.operator("wm.url_open", text="Help | Source | Updates", icon='QUESTION').url = "https://github.com/oormicreations/Seashells"
+        layout.label(text = sstool.ss_about)
+        
+        
+#---------------------------------------------------------------------------------------------------
+# Properties
+#---------------------------------------------------------------------------------------------------
 
 class CCProperties(PropertyGroup):
     
@@ -366,6 +546,58 @@ class CCProperties(PropertyGroup):
         default = "Ready..."
       )
 
+    ss_about: StringProperty(
+        name = "About",
+        description = "NA",
+        default = "Oormi Creations | http://oormi.in"
+      )
+
+    fan_subdiv: IntProperty(
+        name = "Subdivisions",
+        description = "Number of subdivisions or mesh resolution",
+        default = 20,
+        min=1,
+        max=100        
+      )
+       
+    fan_nblades: IntProperty(
+        name = "Blades",
+        description = "Number of fan blades",
+        default = 5,
+        min=1,
+        max=360
+      )   
+
+    fan_anim: BoolProperty(
+        name = "Animate",
+        description = "Animate the fan, make it spin",
+        default = True
+    )
+
+    fan_speed: IntProperty(
+        name = "Speed",
+        description = "Number of full rotations in given time range",
+        default = 2,
+        min=1,
+        max=100
+      )   
+
+    fan_fstart: IntProperty(
+        name = "Start frame",
+        description = "Animation start frame",
+        default = 1,
+        min=1,
+        max=100000
+      )   
+
+    fan_fend: IntProperty(
+        name = "End frame",
+        description = "Animation end frame",
+        default = 100,
+        min=1,
+        max=100000
+      )   
+
 
 
     
@@ -375,8 +607,12 @@ class CCProperties(PropertyGroup):
 
 classes = (
     OBJECT_PT_SSPanel,
+    OBJECT_PT_FanPanel,
+    OBJECT_PT_MiscPanel,
     CCProperties,
-    CCS_OT_CCreateSeaShell
+    CCS_OT_CCreateSeaShell,
+    CCF_OT_CCreateFan,
+    CRD_OT_CResetDefaults
 )
 
 def register():
