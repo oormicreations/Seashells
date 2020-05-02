@@ -6,6 +6,7 @@ A Blender add-on for creating seashells
 
 ![logo](https://oormi.in/software/software_images/seashellsthumb.jpg)
 
+![fans](https://oormi.in/software/software_images/fanthumb.jpg)
 ---
 
 **Requirements**
