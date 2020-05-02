@@ -15,11 +15,12 @@ A Blender add-on for creating seashells
 **Features**
 
 * Creates seashell models in one click.
-* Creates three kinds of procedural materials.
+* Creates three kinds of procedural materials for seashells.
+* Creates and animates paper fans.
 
 **Intro**
 
-This very simple add-on generates seashell models with a procedural material. It was a fun project basically to learn new things. But can be useful for all blender artists.
+This very simple add-on generates seashell models with a procedural material. It also creates folded paper fans. It was a fun project basically to learn new things. But can be useful for all blender artists.
 
 
 **Intro Video**
@@ -44,6 +45,20 @@ Just click the **Create Seashell** button!
 **Material** drop down enables you to choose from 3 built in materials - Swirls, Stripes and Patchy.
 
 **Clean Up** check box, when checked, will apply all the modifiers to the object and will delete the deformation lattice. You can uncheck it if you wish to play with various parameters of the modifiers or wish to change the shape of the seashell using the lattice points.
+
+**Create Fan** button instantly creates a folded paper fan!
+
+**Subdivisions** is the number of times the blade is subdivided. Mesh density.
+
+**Blades** is the number of blades.
+
+**Animate** enables or disables rotation animation. 
+
+**Speed** is number of full turns taken in given frame range.
+
+**Start and End Frames** are what they say they are.
+
+**Reset Defaults** button will reset all parameters of seashells and fans to default values. Else they remain stored in your blender file.
 
 **Help | Source | Updates** brings you to this page on GitHub.
 
@@ -71,7 +86,7 @@ oormicreations@gmail.com
 
 ![logo](https://oormi.in/software/cbp/images/OormiLogo.png)
 
-April 2020.
+May 2020.
 
 
 
